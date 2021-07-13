@@ -10,6 +10,9 @@ inputs:
   aws-api-url:
     description: "The api url of the AWS ApiGateway"
     required: true
+  branch:
+    description: "For every branch there can be different badges. Branch is used as the primary key for the image upload."
+    required: false
 outputs:
   url:
     description: "Url of resulting svg"
@@ -20,11 +23,12 @@ runs:
     - id: call-badge-api
       name: "Call Badge API"
       run: |
+        branch=${{inputs.branch}} | ${github_repository##*/}
         github_ref=${{github.ref}}
         github_repository=${{github.repository}}
         echo {\"total_coverage\": ${{inputs.total-coverage}}, \
               \"project\": \"${github_ref##*/}\", \
-              \"branch\": \"${github_repository##*/}\"} \
+              \"branch\": \"${branch}\"} \
         >> data.json
         response=$(curl -s --request POST '${{inputs.aws-api-url}}' \
         --header 'x-api-key: ${{inputs.aws-api-key}}' \
